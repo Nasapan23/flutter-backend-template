@@ -1,0 +1,173 @@
+# Flutter Backend Template Architecture
+
+## Technology Stack
+
+1. **FastAPI**: Core web framework providing async request handling, automatic OpenAPI documentation, dependency injection, and high performance
+2. **SQLAlchemy**: ORM with async support for database interactions
+3. **Pydantic**: Data validation and settings management
+4. **JWT Authentication**: For secure token-based auth using python-jose
+5. **AI Integration**: OpenAI, Hugging Face Transformers, and statistical libraries
+6. **Testing**: Pytest for unit and integration tests
+7. **Database**: Support for SQLite, PostgreSQL, MySQL with async drivers
+
+## Architectural Patterns
+
+### Clean Architecture
+
+The project follows a clean architecture approach with clear separation of concerns:
+
+1. **Domain Layer**: Core business logic in models and services
+2. **Application Layer**: API routes, controllers, and use cases
+3. **Infrastructure Layer**: Database interactions, external services
+
+### Repository Pattern
+
+Database interactions are abstracted through repositories, allowing for:
+- Easy switching between different database engines
+- Clean separation between business logic and data access
+- Testability through mocking repositories
+
+### Dependency Injection
+
+FastAPI's dependency injection system is used throughout for:
+- Database sessions
+- Authentication and permissions
+- Service dependencies
+
+## Directory Structure Explained
+
+### `/app`: Main Application Package
+
+- **`/ai`**: AI integration modules
+  - **`/llm`**: Large Language Model integrations (OpenAI, etc.)
+  - **`/custom_models`**: Custom ML models from Hugging Face, etc.
+  - **`/statistical`**: Statistical and traditional ML models
+
+- **`/api`**: API endpoints organized by version
+  - **`/v1`**: Version 1 API endpoints
+    - **`/endpoints`**: Individual feature endpoints
+  - Version structure allows for API evolution without breaking changes
+
+- **`/core`**: Core application functionality
+  - Configuration
+  - Security (JWT, password hashing)
+  - Base functionality used across the application
+
+- **`/db`**: Database-related modules
+  - Session management
+  - Base model classes
+  - Database utilities
+  - Migration scripts (Alembic)
+
+- **`/models`**: SQLAlchemy ORM models
+  - Database entity definitions
+  - Relationships between entities
+  - Database constraints
+
+- **`/schemas`**: Pydantic models for:
+  - Request validation
+  - Response serialization
+  - Data transfer objects
+
+- **`/services`**: Business logic services
+  - Implementation of use cases
+  - Service layer between API and data access
+
+- **`/utils`**: Utility functions and helpers
+
+### `/config`: Configuration Files
+
+- Environment-specific settings
+- Logging configuration
+- Other global configuration
+
+### `/tests`: Test Suite
+
+- Unit tests
+- Integration tests
+- Fixtures and test utilities
+
+## Authentication Flow
+
+1. User registers via `/api/v1/auth/register` endpoint
+2. User logs in via `/api/v1/auth/token` endpoint
+3. Server validates credentials and returns JWT token
+4. Client includes token in Authorization header for protected endpoints
+5. Server validates token and identifies user for each request
+
+## Database Design
+
+- Async SQLAlchemy ORM for all database operations
+- Base model with common fields (id, created_at, updated_at)
+- Support for multiple database engines through URL configuration
+- Automatic table creation on startup
+
+## AI Integration Architecture
+
+### LLM Integration (OpenAI)
+
+- Abstracted through service layer in `/app/ai/llm`
+- Configurable models and parameters
+- Error handling and rate limiting
+- Async API calls for non-blocking operation
+
+### Custom Models (Hugging Face)
+
+- Infrastructure for loading and using custom models
+- Pipelines for text, image, and other data processing
+- Model caching and optimization
+
+### Statistical Models
+
+- Integration with scikit-learn, pandas, numpy
+- Data processing pipelines
+- Model training and prediction workflows
+
+## API Versioning Strategy
+
+- URL-based versioning (e.g., `/api/v1/users`)
+- Allows multiple versions to coexist
+- Clear path for deprecation and migration
+
+## CORS and Security
+
+- Configurable CORS for Flutter and Vite frontends
+- JWT token-based authentication
+- Role-based access control
+- Password hashing with bcrypt
+- Environment-based security settings
+
+## Flutter Integration
+
+- Appropriate CORS headers for web and mobile apps
+- JWT authentication ready for Flutter secure storage
+- API designed for efficient mobile consumption
+- Swagger documentation for easy client generation
+
+## Extensibility Points
+
+1. **New API Endpoints**: 
+   - Add new files in `/app/api/v1/endpoints`
+   - Update `/app/api/v1/router.py` to include them
+
+2. **New Database Models**:
+   - Create model in `/app/models`
+   - Add to `__init__.py` exports
+   - Create corresponding Pydantic schemas
+
+3. **AI Capabilities**:
+   - Add new AI services in appropriate AI subdirectory
+   - Create corresponding API endpoints
+   - Update schemas for request/response
+
+4. **Database Migrations**:
+   - Use Alembic to generate and run migrations
+   - Store migration scripts in the project
+
+## Performance Considerations
+
+- Async everything for high throughput
+- Connection pooling for database
+- Proper indexing on database models
+- Lightweight dependencies
+- Efficient serialization/deserialization with Pydantic 
